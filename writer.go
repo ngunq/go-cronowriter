@@ -32,6 +32,13 @@ var (
 	now                = time.Now            // for test
 )
 
+func StubNow(value string) {
+	now = func() time.Time {
+		t, _ := time.Parse("2006-01-02 15:04:05 -0700", value)
+		return t
+	}
+}
+
 // New returns a CronoWriter with the given pattern and options.
 func New(pattern string, options ...Option) (*CronoWriter, error) {
 	p, err := strftime.New(pattern)
