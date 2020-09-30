@@ -21,7 +21,7 @@ type (
 		mux     sync.Locker
 		log     logger
 		init    bool // if true, open the file when New() method is called
-		now	string
+		now	    string
 	}
 
 	// A Option with CronoWriter.
@@ -34,9 +34,9 @@ var (
 )
 
 func stubNow(value string) {
-	if value != nil {
+	if value != "" {
 		now = func() time.Time {
-			t, _ := time.Parse("2006-01-02 15:04:05 -0700", value)
+			t, _ := time.Parse("2006-01-02T15:04:05-07:00", value)
 			return t
 		}
 	}
@@ -142,7 +142,7 @@ func WithInit() Option {
 	}
 }
 
-func WithStubNow(value string) Option {
+func WithNow(value string) Option {
 	return func(c *CronoWriter) {
 		c.now = value
 	}
@@ -152,7 +152,7 @@ func WithStubNow(value string) Option {
 func (c *CronoWriter) Write(b []byte) (int, error) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
-	
+
 	stubNow(c.now)
 	t := now().In(c.loc)
 	path := c.pattern.FormatString(t)
@@ -171,7 +171,7 @@ func (c *CronoWriter) Write(b []byte) (int, error) {
 			return c.write(nil, err)
 		}
 
-		fp, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+		fp, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0777)
 		if err != nil {
 			return c.write(nil, err)
 		}
